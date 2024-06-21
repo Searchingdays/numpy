@@ -15,7 +15,7 @@
 
 
 
-#include "multiarraymodule.h"
+#include "npy_static_data.h"
 #include "common.h"
 #include "dtype_transfer.h"
 #include "dtypemeta.h"
@@ -243,9 +243,12 @@ PyArray_TakeFrom(PyArrayObject *self0, PyObject *indices0, int axis,
     if (self == NULL) {
         return NULL;
     }
-    indices = (PyArrayObject *)PyArray_ContiguousFromAny(indices0,
-                                                         NPY_INTP,
-                                                         0, 0);
+
+    indices = (PyArrayObject *)PyArray_FromAny(indices0,
+                PyArray_DescrFromType(NPY_INTP),
+                0, 0,
+                NPY_ARRAY_SAME_KIND_CASTING | NPY_ARRAY_DEFAULT,
+                NULL);
     if (indices == NULL) {
         goto fail;
     }
@@ -2259,10 +2262,10 @@ PyArray_Diagonal(PyArrayObject *self, int offset, int axis1, int axis2)
     }
 
     /* Handle negative axes with standard Python indexing rules */
-    if (check_and_adjust_axis_msg(&axis1, ndim, npy_ma_str_axis1) < 0) {
+    if (check_and_adjust_axis_msg(&axis1, ndim, npy_interned_str.axis1) < 0) {
         return NULL;
     }
-    if (check_and_adjust_axis_msg(&axis2, ndim, npy_ma_str_axis2) < 0) {
+    if (check_and_adjust_axis_msg(&axis2, ndim, npy_interned_str.axis2) < 0) {
         return NULL;
     }
     if (axis1 == axis2) {
